@@ -1006,6 +1006,7 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {

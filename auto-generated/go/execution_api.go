@@ -320,6 +320,7 @@ func (a *ExecutionApiService) ExecutionGetTradeHistory(ctx context.Context, loca
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {

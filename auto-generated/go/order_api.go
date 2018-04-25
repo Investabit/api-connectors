@@ -416,6 +416,7 @@ func (a *OrderApiService) OrderCancel(ctx context.Context, localVarOptionals map
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {
@@ -917,6 +918,7 @@ func (a *OrderApiService) OrderGetOrders(ctx context.Context, localVarOptionals 
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {
@@ -1156,6 +1158,7 @@ func (a *OrderApiService) OrderNew(ctx context.Context, symbol string, localVarO
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {

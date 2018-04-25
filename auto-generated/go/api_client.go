@@ -192,7 +192,7 @@ func (c *APIClient) ChangeBasePath(path string) {
 	c.cfg.BasePath = path
 }
 
-func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, queryParams url.Values) (string, error) {
+func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, queryParams url.Values, queryData url.Values) (string, error) {
 	u, err := url.Parse(path)
 	if err != nil {
 		return "", err
@@ -207,7 +207,13 @@ func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, que
 	urlRequestPath := u.RequestURI()
 
 	mac := hmac.New(sha256.New, []byte(apiSecret))
-	mac.Write([]byte(method + urlRequestPath + expireTime))
+
+	data := ""
+	if method == "POST" || method == "PUT" {
+		data = queryData.Encode()
+	}
+
+	mac.Write([]byte(method + urlRequestPath + expireTime + data))
 	macHash := mac.Sum(nil)
 	return hex.EncodeToString(macHash), nil
 }

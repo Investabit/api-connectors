@@ -127,6 +127,7 @@ func (a *PositionApiService) PositionGet(ctx context.Context, localVarOptionals 
 				auth.APISecret,
 				localVarHeaderParams["api-expires"],
 				localVarQueryParams,
+				localVarFormParams,
 			)
 
 			if err != nil {
