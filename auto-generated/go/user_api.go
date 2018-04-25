@@ -1026,7 +1026,7 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 	if err != nil || localVarHttpResponse == nil {
 		return successPayload, localVarHttpResponse, err
 	}
-	// defer localVarHttpResponse.Body.Close()
+	defer localVarHttpResponse.Body.Close()
 	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
 	}
