@@ -210,7 +210,10 @@ func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, que
 
 	data := ""
 	if method == "POST" || method == "PUT" {
-		data = queryData.Encode()
+		data, err = EncodeFormParameters(queryData)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	mac.Write([]byte(method + urlRequestPath + expireTime + data))
@@ -220,6 +223,18 @@ func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, que
 
 func GenExpireTime() string {
 	return strconv.FormatInt(time.Now().Add(5*time.Minute).Unix(), 10)
+}
+
+func EncodeFormParameters(queryData url.Values) (string, error) {
+	tmpBody := make(map[string]string)
+	for k, v := range queryData {
+		tmpBody[k] = v[0]
+	}
+	bodyBytes, err := json.Marshal(tmpBody)
+	if err != nil {
+		return "", err
+	}
+	return string(bodyBytes), err
 }
 
 // prepareRequest build the request
@@ -234,6 +249,14 @@ func (c *APIClient) prepareRequest(
 	fileBytes []byte) (localVarRequest *http.Request, err error) {
 
 	var body *bytes.Buffer
+
+	if len(formParams) > 0 {
+		postBody, err = EncodeFormParameters(formParams)
+		if err != nil {
+			return
+		}
+		formParams = url.Values{}
+	}
 
 	// Detect postBody type and post.
 	if postBody != nil {
