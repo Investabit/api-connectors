@@ -1,7 +1,7 @@
-/* 
+/*
  * BitMEX API
  *
- * ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section. 
+ * ## REST API for the BitMEX Trading Platform  [View Changelog](/app/apiChangelog)    #### Getting Started   ##### Fetching Data  All REST endpoints are documented below. You can try out any query right from this interface.  Most table queries accept `count`, `start`, and `reverse` params. Set `reverse=true` to get rows newest-first.  Additional documentation regarding filters, timestamps, and authentication is available in [the main API documentation](https://www.bitmex.com/app/restAPI).  *All* table data is available via the [Websocket](/app/wsAPI). We highly recommend using the socket if you want to have the quickest possible data without being subject to ratelimits.  ##### Return Types  By default, all data is returned as JSON. Send `?_format=csv` to get CSV data or `?_format=xml` to get XML data.  ##### Trade Data Queries  *This is only a small subset of what is available, to get you started.*  Fill in the parameters and click the `Try it out!` button to try any of these queries.  * [Pricing Data](#!/Quote/Quote_get)  * [Trade Data](#!/Trade/Trade_get)  * [OrderBook Data](#!/OrderBook/OrderBook_getL2)  * [Settlement Data](#!/Settlement/Settlement_get)  * [Exchange Statistics](#!/Stats/Stats_history)  Every function of the BitMEX.com platform is exposed here and documented. Many more functions are available.  ##### Swagger Specification  [⇩ Download Swagger JSON](swagger.json)    ## All API Endpoints  Click to expand a section.
  *
  * OpenAPI spec version: 1.2.0
  * Contact: support@bitmex.com
@@ -11,11 +11,13 @@
 package swagger
 
 import (
-	"net/url"
-	"net/http"
-	"strings"
-	"golang.org/x/net/context"
 	"encoding/json"
+	"fmt"
+	"golang.org/x/net/context"
+	"net/http"
+	"net/url"
+
+	"strings"
 )
 
 // Linger please
@@ -25,18 +27,17 @@ var (
 
 type UserApiService service
 
-
 /* UserApiService Cancel a withdrawal.
 
- @param token 
- @return Transaction*/
-func (a *UserApiService) UserCancelWithdrawal(token string) (Transaction,  *http.Response, error) {
+@param token
+@return Transaction*/
+func (a *UserApiService) UserCancelWithdrawal(token string) (Transaction, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Transaction
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Transaction
 	)
 
 	// create path and map variables
@@ -46,9 +47,8 @@ func (a *UserApiService) UserCancelWithdrawal(token string) (Transaction,  *http
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -63,7 +63,7 @@ func (a *UserApiService) UserCancelWithdrawal(token string) (Transaction,  *http
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -76,36 +76,35 @@ func (a *UserApiService) UserCancelWithdrawal(token string) (Transaction,  *http
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Check if a referral code is valid.
- If the code is valid, responds with the referral code&#39;s discount (e.g. &#x60;0.1&#x60; for 10%). Otherwise, will return a 404.
+If the code is valid, responds with the referral code&#39;s discount (e.g. &#x60;0.1&#x60; for 10%). Otherwise, will return a 404.
 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "referralCode" (string) 
- @return float64*/
-func (a *UserApiService) UserCheckReferralCode(localVarOptionals map[string]interface{}) (float64,  *http.Response, error) {
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "referralCode" (string)
+@return float64*/
+func (a *UserApiService) UserCheckReferralCode(localVarOptionals map[string]interface{}) (float64, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  float64
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     float64
 	)
 
 	// create path and map variables
@@ -123,7 +122,7 @@ func (a *UserApiService) UserCheckReferralCode(localVarOptionals map[string]inte
 		localVarQueryParams.Add("referralCode", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -138,7 +137,7 @@ func (a *UserApiService) UserCheckReferralCode(localVarOptionals map[string]inte
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -150,34 +149,33 @@ func (a *UserApiService) UserCheckReferralCode(localVarOptionals map[string]inte
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Confirm your email address with a token.
 
- @param token 
- @return AccessToken*/
-func (a *UserApiService) UserConfirm(token string) (AccessToken,  *http.Response, error) {
+@param token
+@return AccessToken*/
+func (a *UserApiService) UserConfirm(token string) (AccessToken, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  AccessToken
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     AccessToken
 	)
 
 	// create path and map variables
@@ -187,9 +185,8 @@ func (a *UserApiService) UserConfirm(token string) (AccessToken,  *http.Response
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -204,7 +201,7 @@ func (a *UserApiService) UserConfirm(token string) (AccessToken,  *http.Response
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -217,36 +214,35 @@ func (a *UserApiService) UserConfirm(token string) (AccessToken,  *http.Response
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Confirm two-factor auth for this account. If using a Yubikey, simply send a token to this endpoint.
- * @param ctx context.Context Authentication Context 
- @param token Token from your selected TFA type.
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator), &#39;Yubikey&#39;
- @return bool*/
-func (a *UserApiService) UserConfirmEnableTFA(ctx context.Context, token string, localVarOptionals map[string]interface{}) (bool,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param token Token from your selected TFA type.
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator), &#39;Yubikey&#39;
+@return bool*/
+func (a *UserApiService) UserConfirmEnableTFA(ctx context.Context, token string, localVarOptionals map[string]interface{}) (bool, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  bool
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     bool
 	)
 
 	// create path and map variables
@@ -261,7 +257,7 @@ func (a *UserApiService) UserConfirmEnableTFA(ctx context.Context, token string,
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -276,7 +272,7 @@ func (a *UserApiService) UserConfirmEnableTFA(ctx context.Context, token string,
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -328,34 +324,33 @@ func (a *UserApiService) UserConfirmEnableTFA(ctx context.Context, token string,
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Confirm a withdrawal.
 
- @param token 
- @return Transaction*/
-func (a *UserApiService) UserConfirmWithdrawal(token string) (Transaction,  *http.Response, error) {
+@param token
+@return Transaction*/
+func (a *UserApiService) UserConfirmWithdrawal(token string) (Transaction, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Transaction
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Transaction
 	)
 
 	// create path and map variables
@@ -365,9 +360,8 @@ func (a *UserApiService) UserConfirmWithdrawal(token string) (Transaction,  *htt
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -382,7 +376,7 @@ func (a *UserApiService) UserConfirmWithdrawal(token string) (Transaction,  *htt
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -395,36 +389,35 @@ func (a *UserApiService) UserConfirmWithdrawal(token string) (Transaction,  *htt
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Disable two-factor auth for this account.
- * @param ctx context.Context Authentication Context 
- @param token Token from your selected TFA type.
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator)
- @return bool*/
-func (a *UserApiService) UserDisableTFA(ctx context.Context, token string, localVarOptionals map[string]interface{}) (bool,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param token Token from your selected TFA type.
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator)
+@return bool*/
+func (a *UserApiService) UserDisableTFA(ctx context.Context, token string, localVarOptionals map[string]interface{}) (bool, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  bool
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     bool
 	)
 
 	// create path and map variables
@@ -439,7 +432,7 @@ func (a *UserApiService) UserDisableTFA(ctx context.Context, token string, local
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -454,7 +447,7 @@ func (a *UserApiService) UserDisableTFA(ctx context.Context, token string, local
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -506,33 +499,32 @@ func (a *UserApiService) UserDisableTFA(ctx context.Context, token string, local
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get your user model.
- * @param ctx context.Context Authentication Context 
+ * @param ctx context.Context Authentication Context
  @return User*/
-func (a *UserApiService) UserGet(ctx context.Context, ) (User,  *http.Response, error) {
+func (a *UserApiService) UserGet(ctx context.Context) (User, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  User
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     User
 	)
 
 	// create path and map variables
@@ -542,9 +534,8 @@ func (a *UserApiService) UserGet(ctx context.Context, ) (User,  *http.Response, 
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -559,7 +550,7 @@ func (a *UserApiService) UserGet(ctx context.Context, ) (User,  *http.Response, 
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -607,33 +598,32 @@ func (a *UserApiService) UserGet(ctx context.Context, ) (User,  *http.Response, 
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get your current affiliate/referral status.
- * @param ctx context.Context Authentication Context 
+ * @param ctx context.Context Authentication Context
  @return Affiliate*/
-func (a *UserApiService) UserGetAffiliateStatus(ctx context.Context, ) (Affiliate,  *http.Response, error) {
+func (a *UserApiService) UserGetAffiliateStatus(ctx context.Context) (Affiliate, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Affiliate
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Affiliate
 	)
 
 	// create path and map variables
@@ -643,9 +633,8 @@ func (a *UserApiService) UserGetAffiliateStatus(ctx context.Context, ) (Affiliat
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -660,7 +649,7 @@ func (a *UserApiService) UserGetAffiliateStatus(ctx context.Context, ) (Affiliat
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -708,33 +697,32 @@ func (a *UserApiService) UserGetAffiliateStatus(ctx context.Context, ) (Affiliat
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get your account&#39;s commission status.
- * @param ctx context.Context Authentication Context 
+ * @param ctx context.Context Authentication Context
  @return []UserCommission*/
-func (a *UserApiService) UserGetCommission(ctx context.Context, ) ([]UserCommission,  *http.Response, error) {
+func (a *UserApiService) UserGetCommission(ctx context.Context) ([]UserCommission, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  []UserCommission
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     []UserCommission
 	)
 
 	// create path and map variables
@@ -744,9 +732,8 @@ func (a *UserApiService) UserGetCommission(ctx context.Context, ) ([]UserCommiss
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -761,7 +748,7 @@ func (a *UserApiService) UserGetCommission(ctx context.Context, ) ([]UserCommiss
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -809,35 +796,34 @@ func (a *UserApiService) UserGetCommission(ctx context.Context, ) ([]UserCommiss
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get a deposit address.
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return string*/
-func (a *UserApiService) UserGetDepositAddress(ctx context.Context, localVarOptionals map[string]interface{}) (string,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return string*/
+func (a *UserApiService) UserGetDepositAddress(ctx context.Context, localVarOptionals map[string]interface{}) (string, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  string
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     string
 	)
 
 	// create path and map variables
@@ -855,7 +841,7 @@ func (a *UserApiService) UserGetDepositAddress(ctx context.Context, localVarOpti
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -870,7 +856,7 @@ func (a *UserApiService) UserGetDepositAddress(ctx context.Context, localVarOpti
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -918,35 +904,34 @@ func (a *UserApiService) UserGetDepositAddress(ctx context.Context, localVarOpti
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get your account&#39;s margin status. Send a currency of \&quot;all\&quot; to receive an array of all supported currencies.
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return Margin*/
-func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals map[string]interface{}) (Margin,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return Margin*/
+func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals map[string]interface{}) (Margin, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Margin
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Margin
 	)
 
 	// create path and map variables
@@ -964,7 +949,7 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -979,7 +964,9 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
+
+	localVarHeaderParams["api-expires"] = GenExpireTime()
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1013,49 +1000,56 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 	if ctx != nil {
 		// API Key Authentication
 		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
-			var key string
-			if auth.Prefix != "" {
-				key = auth.Prefix + " " + auth.Key
-			} else {
-				key = auth.Key
+			hexHash, err := a.client.GenSignature(
+				localVarHttpMethod,
+				localVarPath,
+				auth.APISecret,
+				localVarHeaderParams["api-expires"],
+				localVarQueryParams,
+			)
+
+			if err != nil {
+				return successPayload, nil, err
 			}
-			localVarHeaderParams["api-signature"] = key
+
+			localVarHeaderParams["api-signature"] = hexHash
 		}
 	}
+
+	fmt.Println("Headers ", localVarHeaderParams)
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	// defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get your current wallet information.
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return Wallet*/
-func (a *UserApiService) UserGetWallet(ctx context.Context, localVarOptionals map[string]interface{}) (Wallet,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return Wallet*/
+func (a *UserApiService) UserGetWallet(ctx context.Context, localVarOptionals map[string]interface{}) (Wallet, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Wallet
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Wallet
 	)
 
 	// create path and map variables
@@ -1073,7 +1067,7 @@ func (a *UserApiService) UserGetWallet(ctx context.Context, localVarOptionals ma
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1088,7 +1082,7 @@ func (a *UserApiService) UserGetWallet(ctx context.Context, localVarOptionals ma
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1136,35 +1130,34 @@ func (a *UserApiService) UserGetWallet(ctx context.Context, localVarOptionals ma
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get a history of all of your wallet transactions (deposits, withdrawals, PNL).
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return []Transaction*/
-func (a *UserApiService) UserGetWalletHistory(ctx context.Context, localVarOptionals map[string]interface{}) ([]Transaction,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return []Transaction*/
+func (a *UserApiService) UserGetWalletHistory(ctx context.Context, localVarOptionals map[string]interface{}) ([]Transaction, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  []Transaction
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     []Transaction
 	)
 
 	// create path and map variables
@@ -1182,7 +1175,7 @@ func (a *UserApiService) UserGetWalletHistory(ctx context.Context, localVarOptio
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1197,7 +1190,7 @@ func (a *UserApiService) UserGetWalletHistory(ctx context.Context, localVarOptio
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1245,35 +1238,34 @@ func (a *UserApiService) UserGetWalletHistory(ctx context.Context, localVarOptio
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get a summary of all of your wallet transactions (deposits, withdrawals, PNL).
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return []Transaction*/
-func (a *UserApiService) UserGetWalletSummary(ctx context.Context, localVarOptionals map[string]interface{}) ([]Transaction,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return []Transaction*/
+func (a *UserApiService) UserGetWalletSummary(ctx context.Context, localVarOptionals map[string]interface{}) ([]Transaction, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  []Transaction
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     []Transaction
 	)
 
 	// create path and map variables
@@ -1291,7 +1283,7 @@ func (a *UserApiService) UserGetWalletSummary(ctx context.Context, localVarOptio
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1306,7 +1298,7 @@ func (a *UserApiService) UserGetWalletSummary(ctx context.Context, localVarOptio
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1354,32 +1346,31 @@ func (a *UserApiService) UserGetWalletSummary(ctx context.Context, localVarOptio
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Log out of BitMEX.
 
- @return */
-func (a *UserApiService) UserLogout() ( *http.Response, error) {
+@return */
+func (a *UserApiService) UserLogout() (*http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
 	)
 
 	// create path and map variables
@@ -1389,9 +1380,8 @@ func (a *UserApiService) UserLogout() ( *http.Response, error) {
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1406,7 +1396,7 @@ func (a *UserApiService) UserLogout() ( *http.Response, error) {
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1418,28 +1408,28 @@ func (a *UserApiService) UserLogout() ( *http.Response, error) {
 		return nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
+	}
 
 	return localVarHttpResponse, err
 }
 
 /* UserApiService Log all systems out of BitMEX. This will revoke all of your account&#39;s access tokens, logging you out on all devices.
- * @param ctx context.Context Authentication Context 
+ * @param ctx context.Context Authentication Context
  @return float64*/
-func (a *UserApiService) UserLogoutAll(ctx context.Context, ) (float64,  *http.Response, error) {
+func (a *UserApiService) UserLogoutAll(ctx context.Context) (float64, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  float64
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     float64
 	)
 
 	// create path and map variables
@@ -1449,9 +1439,8 @@ func (a *UserApiService) UserLogoutAll(ctx context.Context, ) (float64,  *http.R
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1466,7 +1455,7 @@ func (a *UserApiService) UserLogoutAll(ctx context.Context, ) (float64,  *http.R
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1514,36 +1503,35 @@ func (a *UserApiService) UserLogoutAll(ctx context.Context, ) (float64,  *http.R
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get the minimum withdrawal fee for a currency.
- This is changed based on network conditions to ensure timely withdrawals. During network congestion, this may be high. The fee is returned in the same currency.
+This is changed based on network conditions to ensure timely withdrawals. During network congestion, this may be high. The fee is returned in the same currency.
 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "currency" (string) 
- @return interface{}*/
-func (a *UserApiService) UserMinWithdrawalFee(localVarOptionals map[string]interface{}) (interface{},  *http.Response, error) {
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "currency" (string)
+@return interface{}*/
+func (a *UserApiService) UserMinWithdrawalFee(localVarOptionals map[string]interface{}) (interface{}, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Get")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  interface{}
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     interface{}
 	)
 
 	// create path and map variables
@@ -1561,7 +1549,7 @@ func (a *UserApiService) UserMinWithdrawalFee(localVarOptionals map[string]inter
 		localVarQueryParams.Add("currency", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1576,7 +1564,7 @@ func (a *UserApiService) UserMinWithdrawalFee(localVarOptionals map[string]inter
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1588,36 +1576,35 @@ func (a *UserApiService) UserMinWithdrawalFee(localVarOptionals map[string]inter
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Get secret key for setting up two-factor auth.
- Use /confirmEnableTFA directly for Yubikeys. This fails if TFA is already enabled.
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator)
- @return bool*/
-func (a *UserApiService) UserRequestEnableTFA(ctx context.Context, localVarOptionals map[string]interface{}) (bool,  *http.Response, error) {
+Use /confirmEnableTFA directly for Yubikeys. This fails if TFA is already enabled.
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "type_" (string) Two-factor auth type. Supported types: &#39;GA&#39; (Google Authenticator)
+@return bool*/
+func (a *UserApiService) UserRequestEnableTFA(ctx context.Context, localVarOptionals map[string]interface{}) (bool, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  bool
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     bool
 	)
 
 	// create path and map variables
@@ -1632,7 +1619,7 @@ func (a *UserApiService) UserRequestEnableTFA(ctx context.Context, localVarOptio
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1647,7 +1634,7 @@ func (a *UserApiService) UserRequestEnableTFA(ctx context.Context, localVarOptio
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1698,40 +1685,39 @@ func (a *UserApiService) UserRequestEnableTFA(ctx context.Context, localVarOptio
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Request a withdrawal to an external wallet.
- This will send a confirmation email to the email address on record, unless requested via an API Key with the &#x60;withdraw&#x60; permission.
- * @param ctx context.Context Authentication Context 
- @param currency Currency you&#39;re withdrawing. Options: &#x60;XBt&#x60;
- @param amount Amount of withdrawal currency.
- @param address Destination Address.
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "otpToken" (string) 2FA token. Required if 2FA is enabled on your account.
-     @param "fee" (float64) Network fee for Bitcoin withdrawals. If not specified, a default value will be calculated based on Bitcoin network conditions. You will have a chance to confirm this via email.
- @return Transaction*/
-func (a *UserApiService) UserRequestWithdrawal(ctx context.Context, currency string, amount float32, address string, localVarOptionals map[string]interface{}) (Transaction,  *http.Response, error) {
+This will send a confirmation email to the email address on record, unless requested via an API Key with the &#x60;withdraw&#x60; permission.
+* @param ctx context.Context Authentication Context
+@param currency Currency you&#39;re withdrawing. Options: &#x60;XBt&#x60;
+@param amount Amount of withdrawal currency.
+@param address Destination Address.
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "otpToken" (string) 2FA token. Required if 2FA is enabled on your account.
+    @param "fee" (float64) Network fee for Bitcoin withdrawals. If not specified, a default value will be calculated based on Bitcoin network conditions. You will have a chance to confirm this via email.
+@return Transaction*/
+func (a *UserApiService) UserRequestWithdrawal(ctx context.Context, currency string, amount float32, address string, localVarOptionals map[string]interface{}) (Transaction, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  Transaction
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     Transaction
 	)
 
 	// create path and map variables
@@ -1749,7 +1735,7 @@ func (a *UserApiService) UserRequestWithdrawal(ctx context.Context, currency str
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1764,7 +1750,7 @@ func (a *UserApiService) UserRequestWithdrawal(ctx context.Context, currency str
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1821,36 +1807,35 @@ func (a *UserApiService) UserRequestWithdrawal(ctx context.Context, currency str
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Save user preferences.
- * @param ctx context.Context Authentication Context 
- @param prefs 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "overwrite" (bool) If true, will overwrite all existing preferences.
- @return User*/
-func (a *UserApiService) UserSavePreferences(ctx context.Context, prefs string, localVarOptionals map[string]interface{}) (User,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param prefs
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "overwrite" (bool) If true, will overwrite all existing preferences.
+@return User*/
+func (a *UserApiService) UserSavePreferences(ctx context.Context, prefs string, localVarOptionals map[string]interface{}) (User, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Post")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  User
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     User
 	)
 
 	// create path and map variables
@@ -1865,7 +1850,7 @@ func (a *UserApiService) UserSavePreferences(ctx context.Context, prefs string, 
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -1880,7 +1865,7 @@ func (a *UserApiService) UserSavePreferences(ctx context.Context, prefs string, 
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -1932,42 +1917,41 @@ func (a *UserApiService) UserSavePreferences(ctx context.Context, prefs string, 
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
 
 /* UserApiService Update your password, name, and other attributes.
- * @param ctx context.Context Authentication Context 
- @param optional (nil or map[string]interface{}) with one or more of:
-     @param "firstname" (string) 
-     @param "lastname" (string) 
-     @param "oldPassword" (string) 
-     @param "newPassword" (string) 
-     @param "newPasswordConfirm" (string) 
-     @param "username" (string) Username can only be set once. To reset, email support.
-     @param "country" (string) Country of residence.
-     @param "pgpPubKey" (string) PGP Public Key. If specified, automated emails will be sentwith this key.
- @return User*/
-func (a *UserApiService) UserUpdate(ctx context.Context, localVarOptionals map[string]interface{}) (User,  *http.Response, error) {
+* @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "firstname" (string)
+    @param "lastname" (string)
+    @param "oldPassword" (string)
+    @param "newPassword" (string)
+    @param "newPasswordConfirm" (string)
+    @param "username" (string) Username can only be set once. To reset, email support.
+    @param "country" (string) Country of residence.
+    @param "pgpPubKey" (string) PGP Public Key. If specified, automated emails will be sentwith this key.
+@return User*/
+func (a *UserApiService) UserUpdate(ctx context.Context, localVarOptionals map[string]interface{}) (User, *http.Response, error) {
 	var (
 		localVarHttpMethod = strings.ToUpper("Put")
-		localVarPostBody interface{}
-		localVarFileName string
-		localVarFileBytes []byte
-	 	successPayload  User
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     User
 	)
 
 	// create path and map variables
@@ -2003,7 +1987,7 @@ func (a *UserApiService) UserUpdate(ctx context.Context, localVarOptionals map[s
 	}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{ "application/json", "application/x-www-form-urlencoded",  }
+	localVarHttpContentTypes := []string{"application/json", "application/x-www-form-urlencoded"}
 
 	// set Content-Type header
 	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
@@ -2018,7 +2002,7 @@ func (a *UserApiService) UserUpdate(ctx context.Context, localVarOptionals map[s
 		"text/xml",
 		"application/javascript",
 		"text/javascript",
-		}
+	}
 
 	// set Accept header
 	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
@@ -2090,20 +2074,18 @@ func (a *UserApiService) UserUpdate(ctx context.Context, localVarOptionals map[s
 		return successPayload, nil, err
 	}
 
-	 localVarHttpResponse, err := a.client.callAPI(r)
-	 if err != nil || localVarHttpResponse == nil {
-		  return successPayload, localVarHttpResponse, err
-	 }
-	 defer localVarHttpResponse.Body.Close()
-	 if localVarHttpResponse.StatusCode >= 300 {
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-	 }
-	
-	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
-	 	return successPayload, localVarHttpResponse, err
 	}
 
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
 
 	return successPayload, localVarHttpResponse, err
 }
-
