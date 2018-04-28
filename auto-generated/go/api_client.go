@@ -209,7 +209,7 @@ func (c *APIClient) GenSignature(method, path, apiSecret, expireTime string, que
 	mac := hmac.New(sha256.New, []byte(apiSecret))
 
 	data := ""
-	if method == "POST" || method == "PUT" {
+	if method == "POST" || method == "PUT" || method == "DELETE" {
 		data, err = EncodeFormParameters(queryData)
 		if err != nil {
 			return "", err
