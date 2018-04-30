@@ -12,7 +12,6 @@ package swagger
 
 import (
 	"encoding/json"
-	"fmt"
 	"golang.org/x/net/context"
 	"net/http"
 	"net/url"
@@ -1017,7 +1016,6 @@ func (a *UserApiService) UserGetMargin(ctx context.Context, localVarOptionals ma
 		}
 	}
 
-	fmt.Println("Headers ", localVarHeaderParams)
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return successPayload, nil, err
