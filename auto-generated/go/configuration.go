@@ -12,6 +12,7 @@ package swagger
 
 import (
 	"net/http"
+	"time"
 )
 
 const (
@@ -33,12 +34,19 @@ type APIKey struct {
 }
 
 type Configuration struct {
-	BasePath      string            `json:"basePath,omitempty"`
-	Host          string            `json:"host,omitempty"`
-	Scheme        string            `json:"scheme,omitempty"`
-	DefaultHeader map[string]string `json:"defaultHeader,omitempty"`
-	UserAgent     string            `json:"userAgent,omitempty"`
-	HTTPClient    *http.Client
+	BasePath           string            `json:"basePath,omitempty"`
+	Host               string            `json:"host,omitempty"`
+	Scheme             string            `json:"scheme,omitempty"`
+	DefaultHeader      map[string]string `json:"defaultHeader,omitempty"`
+	UserAgent          string            `json:"userAgent,omitempty"`
+	EnableRateLimiter  bool              `json:"enable_rate_limit,omitempty"`
+	RefreshRate        time.Duration     `json:"refresh_rate,omitempty"`
+	MaxBurst           int               `json:"max_burst,omitempty"`
+	DripRate           int               `json:"drip_rate,omitempty"`
+	EnableErrorLimiter bool              `json:"enable_error_limiter,omitempty"`
+	ErrorInterval      time.Duration     `json:"error_interval,omitempty"`
+	ErrorMax           int64             `json:"error_max,omitempty"`
+	HTTPClient         *http.Client
 }
 
 func NewConfiguration() *Configuration {

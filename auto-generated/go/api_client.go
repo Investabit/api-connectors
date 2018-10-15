@@ -12,6 +12,7 @@ package swagger
 
 import (
 	"bytes"
+	ctx "context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -31,8 +32,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
+
+	"golang.org/x/time/rate"
+
+	"github.com/Investabit/ratelimiter"
 )
 
 var (
@@ -66,6 +72,13 @@ type APIClient struct {
 	StatsApi        *StatsApiService
 	TradeApi        *TradeApiService
 	UserApi         *UserApiService
+
+	enableRateLimiter  bool
+	limiter            *rate.Limiter
+	enableErrorLimiter bool
+	errorRateLimiter   *ratelimit.RateLimiter
+	firstUsage         bool
+	mutex              *sync.Mutex
 }
 
 type service struct {
@@ -103,6 +116,12 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.StatsApi = (*StatsApiService)(&c.common)
 	c.TradeApi = (*TradeApiService)(&c.common)
 	c.UserApi = (*UserApiService)(&c.common)
+
+	c.enableRateLimiter = cfg.EnableRateLimiter
+	c.limiter = rate.NewLimiter(rate.Every(cfg.RefreshRate), cfg.MaxBurst)
+	c.enableErrorLimiter = cfg.EnableErrorLimiter
+	c.errorRateLimiter = ratelimit.NewRateLimiter(cfg.ErrorInterval, cfg.ErrorMax)
+	c.firstUsage = true
 
 	return c
 }
@@ -181,9 +200,111 @@ func parameterToString(obj interface{}, collectionFormat string) string {
 	return fmt.Sprintf("%v", obj)
 }
 
+func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error) {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if !c.firstUsage {
+		return false, nil, nil
+	}
+
+	resp, err := c.cfg.HTTPClient.Do(request)
+
+	// Consider monitoring 4xx and 5xx received to reduce requests to prevent IP ban.
+
+	if resp != nil {
+
+		var convErr error
+		var rateLimited bool
+		rateLimited, convErr = c.errorRateUpdate(resp)
+		if rateLimited {
+			if err == nil {
+				err = convErr
+			}
+			return false, resp, err
+		}
+
+		// Use this to check that our configured rate max is correct otherwise reset it.
+		// resp.Header.Get("x-ratelimit-limit") == c.cfg.MaxBurst
+		maxRateLimit, convErr := strconv.Atoi(resp.Header.Get("x-ratelimit-limit"))
+		if convErr == nil {
+			if maxRateLimit != c.cfg.MaxBurst {
+				c.limiter = rate.NewLimiter(rate.Every(c.cfg.RefreshRate), maxRateLimit)
+			}
+
+			// Check if we need to consume some of the tokens to match the actual rate remaining
+			remaining, convErr := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining"))
+			if convErr == nil {
+				// Take into account current request
+				if remaining < maxRateLimit-1 {
+					// Consume the difference to sync local rate limit count.
+					c.limiter.WaitN(ctx.Background(), maxRateLimit-1-remaining)
+				}
+			}
+		}
+	}
+
+	c.firstUsage = false
+	return true, resp, err
+}
+
+func (c *APIClient) errorRateUpdate(resp *http.Response) (rateLimited bool, err error) {
+	if resp.StatusCode >= 400 {
+		// Consume a token
+		c.errorRateLimiter.Consume()
+	}
+
+	if resp.StatusCode == 429 {
+		// We've been rate limited check x-ratelimit-reset or Retry-After and some how prevent requests till then.
+		// Best way would be some sleep or interval wait for that time and then return (failure) so that the next
+		// request can re-try being the first request.
+		var retryAfter int64
+		retryAfter, err = strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
+
+		if err != nil {
+			// Invalid retry after
+			// Sleep for abitrary amount (5 minutes)
+			retryAfter = 300
+		}
+
+		// Sleep until after RetryAfter
+		time.Sleep(time.Duration(retryAfter) * time.Second)
+
+	}
+	return
+}
+
 // callAPI do the request.
 func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
-	return c.cfg.HTTPClient.Do(request)
+
+	if c.enableRateLimiter {
+		if c.firstUsage {
+			requestMade, response, err := c.firstUse(request)
+
+			if requestMade {
+				return response, err
+			}
+		}
+	}
+
+	if c.enableErrorLimiter {
+		c.errorRateLimiter.Wait(ctx.Background())
+	}
+
+	if c.enableRateLimiter {
+		c.limiter.Wait(ctx.Background())
+	}
+
+	resp, err := c.cfg.HTTPClient.Do(request)
+
+	// Update the
+	if c.enableRateLimiter && resp != nil {
+		rateLimiter, _ := c.errorRateUpdate(resp)
+		if rateLimiter && !c.firstUsage {
+			c.firstUsage = true
+		}
+	}
+	return resp, err
 }
 
 // Change base path to allow switching to mocks
