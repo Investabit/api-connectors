@@ -122,6 +122,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.enableErrorLimiter = cfg.EnableErrorLimiter
 	c.errorRateLimiter = ratelimit.NewRateLimiter(cfg.ErrorInterval, cfg.ErrorMax)
 	c.firstUsage = true
+	c.mutex = &sync.Mutex{}
 
 	return c
 }
