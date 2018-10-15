@@ -227,14 +227,14 @@ func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error
 
 		// Use this to check that our configured rate max is correct otherwise reset it.
 		// resp.Header.Get("x-ratelimit-limit") == c.cfg.MaxBurst
-		maxRateLimit, convErr := strconv.Atoi(resp.Header.Get("x-ratelimit-limit"))
+		maxRateLimit, convErr := strconv.Atoi(resp.Header.Get("X-Ratelimit-Limit"))
 		if convErr == nil {
 			if maxRateLimit != c.cfg.MaxBurst {
 				c.limiter = rate.NewLimiter(rate.Every(c.cfg.RefreshRate), maxRateLimit)
 			}
 
 			// Check if we need to consume some of the tokens to match the actual rate remaining
-			remaining, convErr := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining"))
+			remaining, convErr := strconv.Atoi(resp.Header.Get("X-Ratelimit-Remaining"))
 			if convErr == nil {
 				// Take into account current request
 				if remaining < maxRateLimit-1 {
@@ -262,14 +262,27 @@ func (c *APIClient) errorRateUpdate(resp *http.Response) (rateLimited bool, err 
 		var retryAfter int64
 		retryAfter, err = strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 
+		var waitTime time.Duration
 		if err != nil {
 			// Invalid retry after
 			// Sleep for abitrary amount (5 minutes)
 			retryAfter = 300
+		} else {
+			waitTime = time.Duration(retryAfter) * time.Second
+		}
+
+		var reset int64
+		reset, err = strconv.ParseInt(resp.Header.Get("X-Ratelimit-Reset"), 10, 64)
+		if err == nil {
+			resetDuration := time.Unix(reset, 0).Sub(time.Now())
+
+			if int64(resetDuration) > int64(waitTime) {
+				waitTime = resetDuration
+			}
 		}
 
 		// Sleep until after RetryAfter
-		time.Sleep(time.Duration(retryAfter) * time.Second)
+		time.Sleep(waitTime)
 
 	}
 	return
