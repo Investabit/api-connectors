@@ -41,9 +41,10 @@ type Configuration struct {
 	UserAgent          string            `json:"userAgent,omitempty"`
 	EnableRateLimiter  bool              `json:"enable_rate_limit,omitempty"`
 	RefreshRate        time.Duration     `json:"refresh_rate,omitempty"`
-	MaxBurst           int               `json:"max_burst,omitempty"`
+	MaxBurst           int64             `json:"max_burst,omitempty"`
 	DripRate           int               `json:"drip_rate,omitempty"`
 	EnableErrorLimiter bool              `json:"enable_error_limiter,omitempty"`
+	TokenThreshold     int64             `json:"token_threshold,omitempty"`
 	ErrorInterval      time.Duration     `json:"error_interval,omitempty"`
 	ErrorMax           int64             `json:"error_max,omitempty"`
 	HTTPClient         *http.Client

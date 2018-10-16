@@ -36,7 +36,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"golang.org/x/time/rate"
+	rate "github.com/juju/ratelimit"
 
 	"github.com/Investabit/ratelimiter"
 )
@@ -74,7 +74,8 @@ type APIClient struct {
 	UserApi         *UserApiService
 
 	enableRateLimiter  bool
-	limiter            *rate.Limiter
+	limiter            *rate.Bucket
+	tokenThreshold     int64
 	enableErrorLimiter bool
 	errorRateLimiter   *ratelimit.RateLimiter
 	firstUsage         bool
@@ -118,7 +119,8 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.UserApi = (*UserApiService)(&c.common)
 
 	c.enableRateLimiter = cfg.EnableRateLimiter
-	c.limiter = rate.NewLimiter(rate.Every(cfg.RefreshRate), cfg.MaxBurst)
+	c.limiter = rate.NewBucket(cfg.RefreshRate, cfg.MaxBurst)
+	c.tokenThreshold = cfg.TokenThreshold
 	c.enableErrorLimiter = cfg.EnableErrorLimiter
 	c.errorRateLimiter = ratelimit.NewRateLimiter(cfg.ErrorInterval, cfg.ErrorMax)
 	c.firstUsage = true
@@ -227,19 +229,19 @@ func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error
 
 		// Use this to check that our configured rate max is correct otherwise reset it.
 		// resp.Header.Get("x-ratelimit-limit") == c.cfg.MaxBurst
-		maxRateLimit, convErr := strconv.Atoi(resp.Header.Get("X-Ratelimit-Limit"))
+		maxRateLimit, convErr := strconv.ParseInt(resp.Header.Get("X-Ratelimit-Limit"), 10, 64)
 		if convErr == nil {
 			if maxRateLimit != c.cfg.MaxBurst {
-				c.limiter = rate.NewLimiter(rate.Every(c.cfg.RefreshRate), maxRateLimit)
+				c.limiter = rate.NewBucket(c.cfg.RefreshRate, maxRateLimit)
 			}
 
 			// Check if we need to consume some of the tokens to match the actual rate remaining
-			remaining, convErr := strconv.Atoi(resp.Header.Get("X-Ratelimit-Remaining"))
+			remaining, convErr := strconv.ParseInt(resp.Header.Get("X-Ratelimit-Remaining"), 10, 64)
 			if convErr == nil {
 				// Take into account current request
-				if remaining < maxRateLimit-1 {
+				if remaining < maxRateLimit {
 					// Consume the difference to sync local rate limit count.
-					c.limiter.WaitN(ctx.Background(), maxRateLimit-1-remaining)
+					c.limiter.TakeAvailable(maxRateLimit - remaining)
 				}
 			}
 		}
@@ -249,11 +251,29 @@ func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error
 	return true, resp, err
 }
 
+func (c *APIClient) updateRequestTokens(resp *http.Response) {
+	remaining, convErr := strconv.ParseInt(resp.Header.Get("X-Ratelimit-Remaining"), 10, 64)
+	if convErr == nil {
+		if remaining <= c.tokenThreshold {
+			difference := remaining - c.limiter.Available()
+			if difference >= c.tokenThreshold {
+				return
+			} else if difference <= -1*c.tokenThreshold {
+				c.limiter.TakeRemainingAvailable()
+			} else {
+				c.limiter.TakeAvailable(c.tokenThreshold)
+			}
+		}
+	}
+}
+
 func (c *APIClient) errorRateUpdate(resp *http.Response) (rateLimited bool, err error) {
 	if resp.StatusCode >= 400 {
 		// Consume a token
 		c.errorRateLimiter.Consume()
 	}
+
+	c.updateRequestTokens(resp)
 
 	if resp.StatusCode == 429 {
 		// We've been rate limited check x-ratelimit-reset or Retry-After and some how prevent requests till then.
@@ -306,7 +326,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	}
 
 	if c.enableRateLimiter {
-		c.limiter.Wait(ctx.Background())
+		c.limiter.Wait()
 	}
 
 	resp, err := c.cfg.HTTPClient.Do(request)
