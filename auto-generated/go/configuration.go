@@ -15,6 +15,13 @@ import (
 	"time"
 )
 
+type RateLimitLogger interface {
+	InitTokens(currentToken, availableToken int64)
+	CurrentTokens(currentToken, availableToken int64)
+	TokenMinumumReached(currentToken, availableToken int64)
+	RateLimitExceeded(waitFor time.Duration)
+}
+
 const (
 	ContextOAuth2      int = 1
 	ContextBasicAuth   int = 2
@@ -47,7 +54,8 @@ type Configuration struct {
 	TokenThreshold     int64             `json:"token_threshold,omitempty"`
 	ErrorInterval      time.Duration     `json:"error_interval,omitempty"`
 	ErrorMax           int64             `json:"error_max,omitempty"`
-	HTTPClient         *http.Client
+	Logger             RateLimitLogger   `json:"-"`
+	HTTPClient         *http.Client      `json:"-"`
 }
 
 func NewConfiguration() *Configuration {

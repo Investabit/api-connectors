@@ -80,6 +80,7 @@ type APIClient struct {
 	errorRateLimiter   *ratelimit.RateLimiter
 	firstUsage         bool
 	mutex              *sync.Mutex
+	logger             RateLimitLogger
 }
 
 type service struct {
@@ -125,6 +126,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.errorRateLimiter = ratelimit.NewRateLimiter(cfg.ErrorInterval, cfg.ErrorMax)
 	c.firstUsage = true
 	c.mutex = &sync.Mutex{}
+	c.logger = cfg.Logger
 
 	return c
 }
@@ -238,12 +240,16 @@ func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error
 			// Check if we need to consume some of the tokens to match the actual rate remaining
 			remaining, convErr := strconv.ParseInt(resp.Header.Get("X-Ratelimit-Remaining"), 10, 64)
 			if convErr == nil {
+
+				c.logger.InitTokens(remaining, maxRateLimit)
 				// Take into account current request
 				if remaining < maxRateLimit {
 					// Consume the difference to sync local rate limit count.
 					c.limiter.TakeAvailable(maxRateLimit - remaining)
 				}
 			}
+		} else {
+			c.logger.InitTokens(c.cfg.MaxBurst, c.cfg.MaxBurst)
 		}
 	}
 
@@ -254,8 +260,10 @@ func (c *APIClient) firstUse(request *http.Request) (bool, *http.Response, error
 func (c *APIClient) updateRequestTokens(resp *http.Response) {
 	remaining, convErr := strconv.ParseInt(resp.Header.Get("X-Ratelimit-Remaining"), 10, 64)
 	if convErr == nil {
+		c.logger.CurrentTokens(remaining, c.cfg.MaxBurst)
 		if remaining <= c.tokenThreshold {
 			difference := remaining - c.limiter.Available()
+			c.logger.TokenMinumumReached(remaining, c.cfg.MaxBurst)
 			if difference >= c.tokenThreshold {
 				return
 			} else if difference <= -1*c.tokenThreshold {
@@ -300,6 +308,7 @@ func (c *APIClient) errorRateUpdate(resp *http.Response) (rateLimited bool, err 
 				waitTime = resetDuration
 			}
 		}
+		c.logger.RateLimitExceeded(waitTime)
 
 		// Sleep until after RetryAfter
 		time.Sleep(waitTime)
