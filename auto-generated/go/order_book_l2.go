@@ -11,10 +11,9 @@
 package swagger
 
 type OrderBookL2 struct {
-
 	Symbol string `json:"symbol"`
 
-	Id float32 `json:"id"`
+	Id float64 `json:"id"`
 
 	Side string `json:"side"`
 
