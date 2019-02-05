@@ -522,6 +522,9 @@ func (a *OrderApiService) OrderCancelAll(ctx context.Context, localVarOptionals 
 	if localVarTempParam, localVarOk := localVarOptionals["text"].(string); localVarOk {
 		localVarFormParams.Add("text", parameterToString(localVarTempParam, ""))
 	}
+
+	localVarHeaderParams["api-expires"] = GenExpireTime()
+
 	if ctx != nil {
 		// API Key Authentication
 		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
@@ -549,13 +552,20 @@ func (a *OrderApiService) OrderCancelAll(ctx context.Context, localVarOptionals 
 	if ctx != nil {
 		// API Key Authentication
 		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
-			var key string
-			if auth.Prefix != "" {
-				key = auth.Prefix + " " + auth.Key
-			} else {
-				key = auth.Key
+			hexHash, err := a.client.GenSignature(
+				localVarHttpMethod,
+				localVarPath,
+				auth.APISecret,
+				localVarHeaderParams["api-expires"],
+				localVarQueryParams,
+				localVarFormParams,
+			)
+
+			if err != nil {
+				return successPayload, nil, err
 			}
-			localVarHeaderParams["api-signature"] = key
+
+			localVarHeaderParams["api-signature"] = hexHash
 		}
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
